@@ -229,6 +229,10 @@ const htmlBody = `<!doctype html>
 	  <td>Log URL</td>
 	  <td><a href="{{.LogUrl}}">Click Here</a></td>
 	</tr>
+	<tr>
+	  <td>Repo</td>
+	  <td>{{.Source}}</td>
+	</tr>
   </tbody>
 </table>
 </div>
