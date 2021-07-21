@@ -15,6 +15,7 @@
 FROM golang AS build-env
 COPY . /go-src/
 WORKDIR /go-src/smtp
+RUN go mod init
 RUN go test /go-src/smtp
 RUN go build -o /go-app .
 
