@@ -21,6 +21,7 @@ import (
 	"math/big"
 	"os"
 	"regexp"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/civil"
@@ -233,15 +234,26 @@ func (n *bqNotifier) SendNotification(ctx context.Context, build *cbpb.Build) er
 	if err != nil {
 		return fmt.Errorf("error parsing FinishTime: %v", err)
 	}
-
+	unixZeroTimestamp, err := ptypes.TimestampProto(time.Unix(0, 0))
+	if err != nil {
+		return err
+	}
 	for _, step := range build.GetSteps() {
-		startTime, err := parsePBTime(step.Timing.StartTime)
-		if err != nil {
-			return fmt.Errorf("error parsing start time for step: %v", err)
+		st := step.GetTiming().GetStartTime()
+		et := step.GetTiming().GetEndTime()
+		if st == nil {
+			st = unixZeroTimestamp
 		}
-		endTime, err := parsePBTime(step.Timing.EndTime)
+		if et == nil {
+			et = unixZeroTimestamp
+		}
+		startTime, err := parsePBTime(st)
 		if err != nil {
-			return fmt.Errorf("error parsing end time for step: %v", err)
+			return fmt.Errorf("error parsing StartTime: %v", err)
+		}
+		endTime, err := parsePBTime(et)
+		if err != nil {
+			return fmt.Errorf("error parsing EndTime: %v", err)
 		}
 		newStep := &buildStep{
 			Name:      step.Name,
